@@ -2,11 +2,14 @@
 #include "gameNode.h"
 
 #include "startScene.h"
+#include "gameScene.h"
 
 class mainGame : public gameNode
 {
 private:
-	gameNode* _startScene;
+	gameNode* _startScene;		// 스타트 씬(시작화면)
+	gameNode* _gameScene;		// 게임 씬(메인)
+	
 
 public:
 	mainGame();

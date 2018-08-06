@@ -61,6 +61,18 @@
     <Filter Include="mainGame\startScene">
       <UniqueIdentifier>{9655f150-ad48-460e-b5f1-1b070a62dd37}</UniqueIdentifier>
     </Filter>
+    <Filter Include="mainGame\gameScene">
+      <UniqueIdentifier>{8bea3cd2-ca8d-42f8-8982-26cc54fb5002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mainGame\setting">
+      <UniqueIdentifier>{a8bdff2f-683d-4810-9d17-e62fdf1063cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mainGame\gameScene\character">
+      <UniqueIdentifier>{8b47b376-dbc1-444c-a46a-0762332c24ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mainGame\gameScene\player">
+      <UniqueIdentifier>{6d5cda1a-6e98-43fe-bdb0-43ceb28463bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -150,6 +162,18 @@
     <ClInclude Include="startScene.h">
       <Filter>mainGame\startScene</Filter>
     </ClInclude>
+    <ClInclude Include="gameScene.h">
+      <Filter>mainGame\gameScene</Filter>
+    </ClInclude>
+    <ClInclude Include="settingManager.h">
+      <Filter>mainGame\setting</Filter>
+    </ClInclude>
+    <ClInclude Include="character.h">
+      <Filter>mainGame\gameScene\character</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
+      <Filter>mainGame\gameScene\player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -224,6 +248,18 @@
     <ClCompile Include="startScene.cpp">
       <Filter>mainGame\startScene</Filter>
     </ClCompile>
+    <ClCompile Include="gameScene.cpp">
+      <Filter>mainGame\gameScene</Filter>
+    </ClCompile>
+    <ClCompile Include="settingManager.cpp">
+      <Filter>mainGame\setting</Filter>
+    </ClCompile>
+    <ClCompile Include="character.cpp">
+      <Filter>mainGame\gameScene\character</Filter>
+    </ClCompile>
+    <ClCompile Include="player.cpp">
+      <Filter>mainGame\gameScene\player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Dungreed.rc">
@@ -237,5 +273,8 @@
     <Image Include="Dungreed.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

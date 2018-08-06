@@ -1,14 +1,4 @@
-﻿  startScene.cpp
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(26): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(28): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(31): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(33): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(36): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(38): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(62): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(65): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(68): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(71): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(74): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-d:\git\dungreed\project\dungreed\dungreed\startscene.cpp(77): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  Dungreed.vcxproj -> D:\git\Dungreed\Project\Dungreed\Debug\Dungreed.exe
+﻿  Dungreed.cpp
+  mainGame.cpp
+  코드를 생성하고 있습니다...
+  Dungreed.vcxproj -> D:\Git\Dungreed\Project\Dungreed\Debug\Dungreed.exe
