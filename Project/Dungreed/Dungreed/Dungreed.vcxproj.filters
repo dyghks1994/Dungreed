@@ -55,9 +55,6 @@
     <Filter Include="mainGame">
       <UniqueIdentifier>{cecf68be-976e-4622-b9c2-cb748d1b8a7f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="mainGame\bullets">
-      <UniqueIdentifier>{1bfcec3e-b37b-4549-95a6-0112b5b83def}</UniqueIdentifier>
-    </Filter>
     <Filter Include="mainGame\startScene">
       <UniqueIdentifier>{9655f150-ad48-460e-b5f1-1b070a62dd37}</UniqueIdentifier>
     </Filter>
@@ -72,6 +69,9 @@
     </Filter>
     <Filter Include="mainGame\gameScene\player">
       <UniqueIdentifier>{6d5cda1a-6e98-43fe-bdb0-43ceb28463bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mainGame\gameScene\bullets">
+      <UniqueIdentifier>{1bfcec3e-b37b-4549-95a6-0112b5b83def}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -148,7 +148,7 @@
       <Filter>2DGameFramework</Filter>
     </ClInclude>
     <ClInclude Include="bullets.h">
-      <Filter>mainGame\bullets</Filter>
+      <Filter>mainGame\gameScene\bullets</Filter>
     </ClInclude>
     <ClInclude Include="commonMacroFunction.h">
       <Filter>헤더 파일</Filter>
@@ -240,7 +240,7 @@
       <Filter>2DGameFramework</Filter>
     </ClCompile>
     <ClCompile Include="bullets.cpp">
-      <Filter>mainGame\bullets</Filter>
+      <Filter>mainGame\gameScene\bullets</Filter>
     </ClCompile>
     <ClCompile Include="mainGame.cpp">
       <Filter>mainGame</Filter>
