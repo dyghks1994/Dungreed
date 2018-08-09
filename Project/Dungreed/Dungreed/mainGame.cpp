@@ -43,7 +43,7 @@ void mainGame::update(void)
 //그리는 것은 이제 여기에다
 void mainGame::render()
 {
-	PatBlt(getMemDC(), 0, 0, WINSIZEX, WINSIZEY, WHITENESS);
+	PatBlt(getMemDC(), 0, 0, BACKDCSIZEX, BACKDCSIZEY, WHITENESS);
 	//================== 이 위는 손대지 마시오 =========================
 	
 	SCENEMANAGER->render();

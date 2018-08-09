@@ -1,7 +1,7 @@
 #pragma once
 #include "image.h"
 
-static image* _backBuffer = IMAGEMANAGER->addImage("backBuffer", WINSIZEX, WINSIZEY);//추가
+static image* _backBuffer = IMAGEMANAGER->addImage("backBuffer", BACKDCSIZEX, BACKDCSIZEY);//추가
 
 																					 //자식윈도우 메시지 번후 구분을 위한 이넘문
 enum CTRL

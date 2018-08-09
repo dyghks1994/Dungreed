@@ -14,24 +14,24 @@ startScene::~startScene()
 HRESULT startScene::init()
 {
 	// 사용할 이미지 등록
-	IMAGEMANAGER->addImage("시작화면", "image/intro.bmp", WINSIZEX, WINSIZEY, false, NULL);
+	IMAGEMANAGER->addImage("시작화면", "image/startScene/intro.bmp", WINSIZEX, WINSIZEY, false, NULL);
 
-	IMAGEMANAGER->addImage("게임시작_그레이", "image/button_gamestart_gray.bmp", 180, 100, true, RGB(255, 0, 255));
+	IMAGEMANAGER->addImage("게임시작_그레이", "image/startScene/button_gamestart_gray.bmp", 180, 100, true, RGB(255, 0, 255));
 	_btnGameStartGray = IMAGEMANAGER->findImage("게임시작_그레이");
 	
-	IMAGEMANAGER->addImage("게임시작_화이트", "image/button_gamestart_white.bmp", 180, 100, true, RGB(255, 0, 255));
+	IMAGEMANAGER->addImage("게임시작_화이트", "image/startScene/button_gamestart_white.bmp", 180, 100, true, RGB(255, 0, 255));
 	_btnGameStartWhite = IMAGEMANAGER->findImage("게임시작_화이트");
 
-	IMAGEMANAGER->addImage("설정_그레이", "image/button_setting_gray.bmp", 100, 80, true, RGB(255, 0, 255));
+	IMAGEMANAGER->addImage("설정_그레이", "image/startScene/button_setting_gray.bmp", 100, 80, true, RGB(255, 0, 255));
 	_btnSettingGray = IMAGEMANAGER->findImage("설정_그레이");
 
-	IMAGEMANAGER->addImage("설정_화이트", "image/button_setting_white.bmp", 100, 80, true, RGB(255, 0, 255));
+	IMAGEMANAGER->addImage("설정_화이트", "image/startScene/button_setting_white.bmp", 100, 80, true, RGB(255, 0, 255));
 	_btnSettingWhite = IMAGEMANAGER->findImage("설정_화이트");
 
-	IMAGEMANAGER->addImage("종료_그레이", "image/button_end_gray.bmp", 100, 80, true, RGB(255, 0, 255));
+	IMAGEMANAGER->addImage("종료_그레이", "image/startScene/button_end_gray.bmp", 100, 80, true, RGB(255, 0, 255));
 	_btnEndGray = IMAGEMANAGER->findImage("종료_그레이");
 
-	IMAGEMANAGER->addImage("종료_화이트", "image/button_end_white.bmp", 100, 80, true, RGB(255, 0, 255));
+	IMAGEMANAGER->addImage("종료_화이트", "image/startScene/button_end_white.bmp", 100, 80, true, RGB(255, 0, 255));
 	_btnEndWhite = IMAGEMANAGER->findImage("종료_화이트");
 
 	

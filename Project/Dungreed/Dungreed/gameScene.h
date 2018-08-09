@@ -5,7 +5,13 @@
 class gameScene : public gameNode
 {
 private:
-	player _player;
+	image* map;
+	player* _player;
+	
+	
+	RECT _rc;
+	int _x, _y;
+	int _cameraX, _cameraY;
 
 public:
 	gameScene();
