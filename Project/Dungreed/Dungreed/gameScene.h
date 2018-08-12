@@ -4,6 +4,13 @@
 
 class gameScene : public gameNode
 {
+	enum COLLISIONCOLOR 
+	{
+		RED,
+		GREEN,
+		BLUE
+	};
+
 private:
 	image* map;						// 배경 이미지
 	player* _player;				// 플레이어 이미지
@@ -15,6 +22,8 @@ private:
 	bool _cameraHorizontalMoveOk;	// 카메라의 좌우이동 가능 여부
 	bool _cameraVerticalMoveOk;		// 카메라의 상하이동 가능 여부
 
+	int _probeY;					// 픽셀충돌에 사용할 탐사 Y 좌표
+
 public:
 	gameScene();
 	~gameScene();
@@ -25,5 +34,7 @@ public:
 	void render();
 
 	void playerMove();
+
+	bool pixelCollision(int probeY);
 };
 
