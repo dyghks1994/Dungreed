@@ -24,7 +24,7 @@ HRESULT gameScene::init()
 	_y = 250;
 	_rc = RectMakeCenter(_x, _y, 50, 50);
 
-	_probeY = _rc.bottom;
+	_probeY = _rc.bottom + 10;
 
 	_cameraX = _x - WINSIZEX / 2;
 	_cameraY = _y - WINSIZEY / 2;
@@ -54,6 +54,9 @@ void gameScene::render()
 	// 카메라를 이용한 보여주기 렌더
 	_backBuffer->render(getMemDC(), 0, 0, _cameraX, _cameraY, WINSIZEX, WINSIZEY);
 	
+	char str[100];
+	sprintf_s(str, "%d", _y);
+	TextOut(getMemDC(), 50, 50, str, sizeof(str));
 	
 }
 
@@ -61,7 +64,7 @@ void gameScene::playerMove()
 {
 	// ************************************* 캐릭터 조정 **********************************************
 	
-	_y -= 3;
+	_y += 3;
 
 	// 좌로 이동
 	if (KEYMANAGER->isStayKeyDown(VK_LEFT))
@@ -101,11 +104,12 @@ void gameScene::playerMove()
 	if (_y - 25 <= 0) _y = 25;
 	if (_y + 25 >= map->getHeight()) _y = map->getHeight() - 25;
 
-	_rc = RectMakeCenter(_x, _y, 50, 50);
 	_probeY = _rc.bottom;
-
 	pixelCollision(_probeY);
 
+	_rc = RectMakeCenter(_x, _y, 50, 50);
+	
+	
 	// end of 캐릭터 조정 *********************************************************************************
 
 
@@ -138,10 +142,8 @@ void gameScene::playerMove()
 
 bool gameScene::pixelCollision(int probeY)
 {
-
-	//for문을 통해서 탐사축 범위 지정
-	//for (int i = probeY; i < probeY + 1; ++i)
-	//{
+	for (int i = probeY - 30; i <= probeY + 30; ++i)
+	{
 		/*
 		COLORREF = RGB색상을 표현
 		GetPixel = 특정 위치의 (X,Y)에 있는 픽셀의
@@ -150,20 +152,20 @@ bool gameScene::pixelCollision(int probeY)
 		얻어와 해당 위치에 존재하는 BYTE값을 조사하여
 		RGB값을 뻄
 		*/
-		COLORREF color = GetPixel(IMAGEMANAGER->findImage("충돌")->getMemDC(), _x, _probeY + 1);
+		COLORREF color = GetPixel(IMAGEMANAGER->findImage("충돌")->getMemDC(), _x, i);
 
 		//GetR(G)(B)Value  = 색상값 출력 코드
 		int r = GetRValue(color);
 		int g = GetGValue(color);
 		int b = GetBValue(color);
 
-		if (!(r == 0 && g == 255 && b == 0))
+		if (!(r == 255 && g == 0 && b == 255))
 		{
-			_y = _probeY;
-		//	break;
+			_y = i - 25;
+			break;
 		}
-		
-
-	//}
+	}
+	
+	
 	return false;
 }
