@@ -1,5 +1,7 @@
 #pragma once
-class character
+#include "gameNode.h"
+
+class character : public gameNode
 {
 private:
 	image*	_image;		  // 캐릭터 이미지
