@@ -1,13 +1,15 @@
 #pragma once
 #include "character.h"
 
-class player : public character, public gameScene
+class player : public character
 {
 private:
 	image* _player;					// 플레이어 이미지
 
 	RECT _rc;						// 테스트용 RECT
 	int _x, _y;						// 플레이어 x, y 좌표
+	int _jumpCount;					// 점프 횟수
+
 	int _cameraX, _cameraY;			// 카메라 x, y 좌표
 
 	int _probeY;					// 픽셀충돌에 사용할 탐사 Y 좌표

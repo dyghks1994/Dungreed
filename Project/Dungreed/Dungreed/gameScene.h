@@ -11,8 +11,6 @@ public:
 	gameScene();
 	~gameScene();
 
-	image* _map;		// 배경 이미지
-
 	HRESULT init();
 	void release();
 	void update();

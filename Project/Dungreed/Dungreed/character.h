@@ -3,16 +3,18 @@
 
 class character : public gameNode
 {
-private:
-	image*	_image;		  // 캐릭터 이미지
+protected:
+	image*	_charImage;		  // 캐릭터 이미지
 
 	int		_maxHp;		  // 최대 생명력
 	int		_currentHp;	  // 현재 생명력
 	int		_atk;		  // 공격력
+	float	_atkSpeed;	  // 공격속도
 	int		_def;		  // 방어력
 	float	_moveSpeed;	  // 이동속도
 	float	_jumpPower;	  // 점프력
-	float	_atkSpeed;	  // 공격속도
+
+	float	_gravity;	  // 중력
 
 public:
 	character();

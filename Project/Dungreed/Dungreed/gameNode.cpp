@@ -87,6 +87,11 @@ LRESULT gameNode::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lPara
 
 	switch (iMessage)
 	{
+	case WM_CREATE:
+		_map = static_cast<image*>(IMAGEMANAGER->addImage("마을_표면", "image/gameScene/마을_표면.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255)));
+		_mapLand = static_cast<image*>(IMAGEMANAGER->addImage("마을_지형", "image/gameScene/마을_지형.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255)));
+		break;
+
 	case WM_PAINT:
 	{
 		hdc = BeginPaint(hWnd, &ps);
@@ -106,6 +111,14 @@ LRESULT gameNode::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lPara
 
 	case WM_LBUTTONUP:
 		_leftButtonDown = false;
+		break;
+
+	case WM_RBUTTONDOWN:
+		_rightButtonDown = true;
+		break;
+
+	case WM_RBUTTONUP:
+		_rightButtonDown = false;
 		break;
 
 	case WM_MOUSEMOVE:

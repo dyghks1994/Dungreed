@@ -13,17 +13,16 @@ gameScene::~gameScene()
 
 HRESULT gameScene::init()
 {
-	IMAGEMANAGER->addImage("마을_표면", "image/gameScene/마을_표면.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255));
+	//IMAGEMANAGER->addImage("마을_표면", "image/gameScene/마을_표면.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255));
 	_map = IMAGEMANAGER->findImage("마을_표면");
 	_map->setX(0);
 	_map->setY(0);
-
-	IMAGEMANAGER->addImage("마을_지형", "image/gameScene/마을_지형.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255));
+	
+	//IMAGEMANAGER->addImage("마을_지형", "image/gameScene/마을_지형.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255));
 
 	_player = new player;
 	_player->init();
 	
-
 	return S_OK;
 }
 

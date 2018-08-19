@@ -17,6 +17,11 @@ HRESULT player::init()
 	_y = 250;
 	_rc = RectMakeCenter(_x, _y, 50, 50);
 
+	_moveSpeed = 40.0f;
+	_jumpPower = 0;
+	_jumpCount = 0;
+	_gravity = 0.6f;
+	
 	_probeY = _rc.bottom + 10;
 
 	_cameraX = _x - WINSIZEX / 2;
@@ -42,7 +47,7 @@ void player::render()
 	_backBuffer->render(getMemDC(), 0, 0, _cameraX, _cameraY, WINSIZEX, WINSIZEY);
 
 	char str[100];
-	sprintf_s(str, "%d %d %d %d", _x, _y, _cameraX, _cameraY);
+	sprintf_s(str, "%d %d %d", _x, _y, _jumpCount);
 	TextOut(getMemDC(), 50, 50, str, sizeof(str));
 }
 
@@ -50,43 +55,48 @@ void player::move()
 {
 	// ************************************* 캐릭터 조정 **********************************************
 
-	_y += 30;
-
 	// 좌로 이동
-	if (KEYMANAGER->isStayKeyDown(VK_LEFT))
+	if (KEYMANAGER->isStayKeyDown('A'))
 	{
-		_x -= 30;	// 플레이어 x좌표 감소
+		_x -= _moveSpeed;	// 플레이어 x좌표 감소
 	}
 
 	// 우로 이동
-	if (KEYMANAGER->isStayKeyDown(VK_RIGHT))
+	if (KEYMANAGER->isStayKeyDown('D'))
 	{
-		_x += 30;	// 플레이어 x좌표 증가
+		_x += _moveSpeed;	// 플레이어 x좌표 증가
 	}
 
 	// 위로 이동
-	if (KEYMANAGER->isStayKeyDown(VK_UP))
+	if (KEYMANAGER->isStayKeyDown('W'))
 	{
-		_y -= 90;	// 플레이어 y좌표 감소
+		//_y -= 90;	// 플레이어 y좌표 감소
 	}
 
 	// 아래로 이동
-	if (KEYMANAGER->isStayKeyDown(VK_DOWN))
+	if (KEYMANAGER->isStayKeyDown('S'))
 	{
-		_y += 30;	// 플레이어 Y좌표 증가
+		//_y += _moveSpeed;	// 플레이어 Y좌표 증가
 	}
 
 	if (KEYMANAGER->isOnceKeyDown(VK_SPACE))
 	{
+		
+		_jumpPower = 50.0f;		// 점프파워 설정
+		_gravity = 9.0f;		// 중력 설정
 
+		_jumpCount++;
 	}
 
+	_y -= _jumpPower;
+	_jumpPower -= _gravity;
+
 	if (_x - 25 <= 0) _x = 25;
-	if (_x + 25 >= gameScene::_map->getWidth()) _x = _map->getWidth() - 25;
+	if (_x + 25 >= _map->getWidth()) _x = _map->getWidth() - 25;
 	if (_y - 25 <= 0) _y = 25;
 	if (_y + 25 >= _map->getHeight()) _y = _map->getHeight() - 25;
 
-	_probeY = _rc.bottom + 10;
+	_probeY = _rc.bottom + 70;
 	pixelCollision(_probeY);
 
 	_rc = RectMakeCenter(_x, _y, 50, 50);
@@ -115,8 +125,8 @@ void player::move()
 
 bool player::pixelCollision(int probeY)
 {
-	for (int i = probeY - 30; i <= probeY + 30; ++i)
-	{
+	for (int i = probeY - 150; i <= probeY; ++i)
+	{			
 		/*
 		COLORREF = RGB색상을 표현
 		GetPixel = 특정 위치의 (X,Y)에 있는 픽셀의
@@ -125,16 +135,22 @@ bool player::pixelCollision(int probeY)
 		얻어와 해당 위치에 존재하는 BYTE값을 조사하여
 		RGB값을 뻄
 		*/
-		COLORREF color = GetPixel(IMAGEMANAGER->findImage("마을_지형")->getMemDC(), _x, i);
+		COLORREF color = GetPixel(_mapLand->getMemDC(), _x, i);
 
 		//GetR(G)(B)Value  = 색상값 출력 코드
 		int r = GetRValue(color);
 		int g = GetGValue(color);
 		int b = GetBValue(color);
 
-		if (!(r == 255 && g == 0 && b == 255))
+		if (r == 0 && g == 255 && b == 0)
 		{
-			_y = i - 25;
+			_jumpCount = 0;		// 녹색 바닥을 밟으면 점프카운트를 0으로 -> 착지상태로
+			_jumpPower = 0.0f;	// 점프파워 설정
+
+			if (_jumpPower > 0) break;	// 점프중인 상태면 아래 코드 건너 띔
+
+			_y = i - 25;		// y좌표를 땅 위로 설정
+			
 			break;
 		}
 	}
