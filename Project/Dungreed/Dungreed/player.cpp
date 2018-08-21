@@ -13,19 +13,23 @@ player::~player()
 
 HRESULT player::init()
 {
-	_x = 700;
-	_y = 250;
+	_state = DOWN;	// 시작상태 -> 다운
+	_probeY = (float)(_rc.bottom + 10);	// 다운 상태에서 탐사Y 설정
+
+	_x = 700.0f;		// 시작위치 X
+	_y = 250.0f;		// 시작위치 Y
 	_rc = RectMakeCenter(_x, _y, 50, 50);
 
-	_moveSpeed = 40.0f;
-	_jumpPower = 0;
-	_jumpCount = 0;
-	_gravity = 0.6f;
-	
-	_probeY = _rc.bottom + 10;
+	_moveSpeed = 40.0f;			// 이동속도 설정
+	_jumpPower = 0;				// 점프파워 초기화
+	_jumpCount = 0;				// 점프카운트 초기화
+	_gravity = 0.6f;			// 중력 설정
 
-	_cameraX = _x - WINSIZEX / 2;
-	_cameraY = _y - WINSIZEY / 2;
+	_angle = getAngle(_x, _y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
+	_dashPower = 10.0f;			// 대쉬 파워 초기화
+	
+	_cameraX = _x - WINSIZEX / 2;	// 카메라 X 좌표 초기화
+	_cameraY = _y - WINSIZEY / 2;	// 카메라 Y 좌표 초기화
 
 	return S_OK;
 }
@@ -36,18 +40,29 @@ void player::release()
 
 void player::update()
 {
-	move();
+	_angle = getAngle(_x, _y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
+
+	move();		// 캐릭터의 기본 상하좌우 이동과 점프 기능
+
+	if (_rightButtonDown)	// 마우스 우클릭을 눌렀을 때
+	{
+		dash();	// 대쉬 기능 호출
+	}
+	
+	cameraMove();
 }
 
 void player::render()
 {
+	// 샘플 캐릭터 렌더
 	Rectangle(this->getMemDC(), _rc.left, _rc.top, _rc.right, _rc.bottom);
 	
 	// 카메라를 이용한 보여주기 렌더
 	_backBuffer->render(getMemDC(), 0, 0, _cameraX, _cameraY, WINSIZEX, WINSIZEY);
 
+	// 좌표 확인
 	char str[100];
-	sprintf_s(str, "%d %d %d", _x, _y, _jumpCount);
+	sprintf_s(str, "%f %d %d %f", _x, _rc.bottom, _state, _angle);
 	TextOut(getMemDC(), 50, 50, str, sizeof(str));
 }
 
@@ -59,52 +74,185 @@ void player::move()
 	if (KEYMANAGER->isStayKeyDown('A'))
 	{
 		_x -= _moveSpeed;	// 플레이어 x좌표 감소
+		if (_state == LANDING && !pixelCollision(_probeY, 0, 255, 0))
+		{
+			_state = DOWN;
+			_probeI = _rc.bottom;
+			_probeY = _rc.bottom + 50;
+
+			_gravity = 9.0f;
+		}
 	}
 
 	// 우로 이동
 	if (KEYMANAGER->isStayKeyDown('D'))
 	{
 		_x += _moveSpeed;	// 플레이어 x좌표 증가
+		if (_state == LANDING && !pixelCollision(_probeY, 0, 255, 0))
+		{
+			_state = DOWN;
+			_probeI = _rc.bottom;
+			_probeY = _rc.bottom + 50;
+
+			_gravity = 9.0f;
+		}
 	}
 
-	// 위로 이동
-	if (KEYMANAGER->isStayKeyDown('W'))
+	// 아래로 이동(점프)
+	if (KEYMANAGER->isStayKeyDown('S') && KEYMANAGER->isOnceKeyDown(VK_SPACE) && _state == LANDING)
 	{
-		//_y -= 90;	// 플레이어 y좌표 감소
-	}
+		// 초록 땅을 밟은 상태에서 하단 점프를 하는 경우
+		if (pixelCollision(_probeY, 0, 255, 0))
+		{
+			_jumpPower = 0;
+			_gravity = 9.0f;
 
-	// 아래로 이동
-	if (KEYMANAGER->isStayKeyDown('S'))
-	{
-		//_y += _moveSpeed;	// 플레이어 Y좌표 증가
-	}
-
-	if (KEYMANAGER->isOnceKeyDown(VK_SPACE))
-	{
+			_state = DOWNJUMP;			// 하단 점프상태(DOWNJUMP)로 변경
+		}
 		
+		// LANDING 상태지만 빨강 바닥 위에선 더 아래로 갈 수 없음
+
+	}
+	// 위로 점프
+	else if (KEYMANAGER->isOnceKeyDown(VK_SPACE) || KEYMANAGER->isStayKeyDown('W'))
+	{
+		_state = UP;			// 점프상태(UP)로 변경
+
 		_jumpPower = 50.0f;		// 점프파워 설정
 		_gravity = 9.0f;		// 중력 설정
 
-		_jumpCount++;
+		_jumpCount++;			// 점프 카운트 증가
 	}
 
-	_y -= _jumpPower;
-	_jumpPower -= _gravity;
+	
 
-	if (_x - 25 <= 0) _x = 25;
+	_y -= _jumpPower;			// 남은 점프파워 만큼 캐릭터 점프(상하 이동)
+	_jumpPower -= _gravity;		// 점프파워가 중력에 의해 영향을 받음
+	if (_jumpPower < 0 && !pixelCollision(_probeY, 0,255, 0)) _state = DOWN;	// 점프파워가 0보다 작아서 캐릭터가 하강인 경우에 -> 상태를 다운으로 변경
+
+
+	// 캐릭터 상태에 따른 픽셀충돌(_probeY) 조정
+	if (_state == UP)
+	{
+		_probeI = _rc.top;
+		_probeY = _rc.bottom;
+	}
+	if (_state == LANDING)
+	{
+		_probeI = _rc.bottom - 100;
+		_probeY = _rc.bottom + 50;
+
+		if (pixelCollision(_probeY, 0, 255, 0))
+		{
+			//_jumpCount = 0;			// 녹색 바닥을 밟으면 점프카운트를 0으로 -> 착지상태로
+			//_jumpPower = 0.0f;		// 점프파워 설정	
+			//_gravity = 0.0f;
+
+			_y = _probeI - 25.0f;		// y좌표를 땅 위로 설정
+
+		}
+	}
+
+	// 하강 상태
+	if (_state == DOWN)
+	{
+		_probeI = _rc.bottom;
+		_probeY = _rc.bottom + 80;
+
+		if (pixelCollision(_probeY, 0, 255, 0))	// 녹색 바닥과 충돌 했는가?
+		{
+			_jumpCount = 0;			// 녹색 바닥을 밟으면 점프카운트를 0으로 -> 착지상태로
+			_jumpPower = 0.0f;		// 점프파워 설정	
+			_gravity = 0.0f;		// 아래로 내려가지 않게 중력을 0으로 설정
+		
+			_y = _probeI - 25.0f;		// y좌표를 땅 위로 설정
+			_state = LANDING;		// 착지 상태로 변경
+		}
+
+		_probeI = _rc.bottom;		// 탐사 시작 위치 재 설정
+		if (pixelCollision(_probeY, 255, 0, 0)) // 빨강 바닥과 충돌 했는가?
+		{
+			_jumpCount = 0;			// 빨강 바닥을 밟으면 점프카운트를 0으로 -> 착지상태로
+			_jumpPower = 0.0f;		// 점프파워 설정	
+			_gravity = 0.0f;		// 아래로 내려가지 않게 중력을 0으로 설정
+		
+			_y = _probeI - 25;		// y좌표를 땅 위로 설정
+			_state = LANDING;		// 착지 상태로 변경
+		}
+	}
+
+	// 하단 점프를 하고 있을 때
+	if (_state == DOWNJUMP)
+	{
+		_probeI = _rc.top;
+		_probeY = _rc.bottom;
+
+		// 녹색 땅과 충돌에서 벗어난 경우
+		if (!pixelCollision(_probeY, 0, 255, 0))
+		{
+			// 일반 다운 상태로 변경
+			_state = DOWN;
+		}
+	}
+
+
+	// 캐릭터의 상하좌우 맵 이탈 방지
+	if (_x - 25 <= 0.0f) _x = 25.0f;
 	if (_x + 25 >= _map->getWidth()) _x = _map->getWidth() - 25;
-	if (_y - 25 <= 0) _y = 25;
+	if (_y - 25 <= 0.0f) _y = 25.0f;
 	if (_y + 25 >= _map->getHeight()) _y = _map->getHeight() - 25;
 
-	_probeY = _rc.bottom + 70;
-	pixelCollision(_probeY);
-
-	_rc = RectMakeCenter(_x, _y, 50, 50);
-
+	_rc = RectMakeCenter(_x, _y, 50, 50);		// 최종 좌표에 캐릭터의 포지션을 잡는다
 
 	// end of 캐릭터 조정 *********************************************************************************
 
+}
 
+void player::dash()
+{	
+	if (_dashPower > 0.0f)
+	{
+		_x = cosf(_angle) * _dashPower;
+		_y = -sinf(_angle) * _dashPower;
+
+		_dashPower -= 3.0f;
+	}
+	
+	_dashPower = 10.0f;
+
+	
+
+}
+
+bool player::pixelCollision(int probeY, int probeR, int probeG, int probeB)
+{
+	for (; _probeI <= probeY; ++_probeI)
+	{			
+		/*
+		COLORREF = RGB색상을 표현
+		GetPixel = 특정 위치의 (X,Y)에 있는 픽셀의
+		RGB값을 돌려준다. 이작업을 하기 위해서는 SELECT된
+		비트맵의 정보구조를 파악하고 비트맵의 이미지 버퍼를
+		얻어와 해당 위치에 존재하는 BYTE값을 조사하여
+		RGB값을 뻄
+		*/
+		COLORREF color = GetPixel(_mapLand->getMemDC(), _x, _probeI);
+
+		//GetR(G)(B)Value  = 색상값 출력 코드
+		int r = GetRValue(color);
+		int g = GetGValue(color);
+		int b = GetBValue(color);
+
+		if (r == probeR && g == probeG && b == probeB)
+		{
+			return true;		// 픽실 탐색 결과 원하는 색상과 일치함.			
+		}
+	}
+	return false;	// 픽셀 탐색 결과 원하는 색상과 다름
+}
+
+void player::cameraMove()
+{
 	// 카메라 조정 ****************************************************************************************
 	_cameraX = _x - WINSIZEX / 2;
 	_cameraY = _y - WINSIZEY / 2;
@@ -121,39 +269,4 @@ void player::move()
 	if (_y + WINSIZEY / 2 >= _map->getWidth()) _cameraY = _map->getHeight() - WINSIZEY;
 
 	// end of 카메라 조정 **********************************************************************************
-}
-
-bool player::pixelCollision(int probeY)
-{
-	for (int i = probeY - 150; i <= probeY; ++i)
-	{			
-		/*
-		COLORREF = RGB색상을 표현
-		GetPixel = 특정 위치의 (X,Y)에 있는 픽셀의
-		RGB값을 돌려준다. 이작업을 하기 위해서는 SELECT된
-		비트맵의 정보구조를 파악하고 비트맵의 이미지 버퍼를
-		얻어와 해당 위치에 존재하는 BYTE값을 조사하여
-		RGB값을 뻄
-		*/
-		COLORREF color = GetPixel(_mapLand->getMemDC(), _x, i);
-
-		//GetR(G)(B)Value  = 색상값 출력 코드
-		int r = GetRValue(color);
-		int g = GetGValue(color);
-		int b = GetBValue(color);
-
-		if (r == 0 && g == 255 && b == 0)
-		{
-			_jumpCount = 0;		// 녹색 바닥을 밟으면 점프카운트를 0으로 -> 착지상태로
-			_jumpPower = 0.0f;	// 점프파워 설정
-
-			if (_jumpPower > 0) break;	// 점프중인 상태면 아래 코드 건너 띔
-
-			_y = i - 25;		// y좌표를 땅 위로 설정
-			
-			break;
-		}
-	}
-
-	return false;
 }

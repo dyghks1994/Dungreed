@@ -28,13 +28,13 @@ HRESULT mainGame::init(void)
 //메모리 해제
 void mainGame::release(void)
 {
-	gameNode::release(); //손대지 마셈
+	gameNode::release(); 
 }
 
 //연산은 여기서 한다
 void mainGame::update(void)
 {
-	gameNode::update();  //손대지 마셈
+	gameNode::update();  
 
 	SCENEMANAGER->update();
 	
