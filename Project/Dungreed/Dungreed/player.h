@@ -18,12 +18,16 @@ private:
 
 	RECT _rc;						// 테스트용 RECT
 	float _x, _y;						// 플레이어 x, y 좌표
-	int _jumpCount;					// 점프 횟수
+	float _jumpCount;					// 점프 횟수
 
 	float _angle;					// 마우스 방향에 따른 각도 -> 대쉬와 공격에 사용
+	
+	bool  _dash;					// 대쉬 상태인지 판별하는 변수
 	float _dashPower;				// 대쉬 파워
+	float _dashCount;				// 대쉬하는 시간 카운트
 
-	int _cameraX, _cameraY;			// 카메라 x, y 좌표
+
+	float _cameraX, _cameraY;			// 카메라 x, y 좌표
 
 	float _probeI;					// 픽셀충돌 반복에 사용할 I 변수 -> 탐색 시작 지점
 	float _probeY;					// 픽셀충돌에 사용할 탐사 Y 좌표 -> 탐색 끝 지점

@@ -14,19 +14,22 @@ player::~player()
 HRESULT player::init()
 {
 	_state = DOWN;	// 시작상태 -> 다운
-	_probeY = (float)(_rc.bottom + 10);	// 다운 상태에서 탐사Y 설정
+	_probeY = (float)(_rc.bottom + 10.0f);	// 다운 상태에서 탐사Y 설정
 
 	_x = 700.0f;		// 시작위치 X
 	_y = 250.0f;		// 시작위치 Y
 	_rc = RectMakeCenter(_x, _y, 50, 50);
 
 	_moveSpeed = 40.0f;			// 이동속도 설정
-	_jumpPower = 0;				// 점프파워 초기화
-	_jumpCount = 0;				// 점프카운트 초기화
+	_jumpPower = 0.0f;			// 점프파워 초기화
+	_jumpCount = 0.0f;			// 점프카운트 초기화
 	_gravity = 0.6f;			// 중력 설정
 
 	_angle = getAngle(_x, _y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
-	_dashPower = 10.0f;			// 대쉬 파워 초기화
+
+	_dash = false;				// 처음엔 대쉬 상태가 아니게 시작
+	_dashPower = 200.0f;		// 대쉬 파워 초기화
+	_dashCount = 0.0f;			// 대쉬 시간 카운터 초기화
 	
 	_cameraX = _x - WINSIZEX / 2;	// 카메라 X 좌표 초기화
 	_cameraY = _y - WINSIZEY / 2;	// 카메라 Y 좌표 초기화
@@ -40,14 +43,17 @@ void player::release()
 
 void player::update()
 {
-	_angle = getAngle(_x, _y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
-
-	move();		// 캐릭터의 기본 상하좌우 이동과 점프 기능
-
-	if (_rightButtonDown)	// 마우스 우클릭을 눌렀을 때
+	if (_rightButtonDown && !_dash)
 	{
-		dash();	// 대쉬 기능 호출
+		_dash = true;	// 마우스 오른쪽 클릭되면 대쉬 상태로
+		_angle = getAngle(_x, _y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
 	}
+
+	if(!_dash)
+		move();		// 캐릭터의 기본 상하좌우 이동과 점프 기능
+	
+	if(_dash)
+		dash();		// 대쉬 기능 호출
 	
 	cameraMove();
 }
@@ -62,7 +68,7 @@ void player::render()
 
 	// 좌표 확인
 	char str[100];
-	sprintf_s(str, "%f %d %d %f", _x, _rc.bottom, _state, _angle);
+	sprintf_s(str, "%.0f %.d   %d    %f", _x, _rc.bottom, _state, _angle);
 	TextOut(getMemDC(), 50, 50, str, sizeof(str));
 }
 
@@ -77,8 +83,8 @@ void player::move()
 		if (_state == LANDING && !pixelCollision(_probeY, 0, 255, 0))
 		{
 			_state = DOWN;
-			_probeI = _rc.bottom;
-			_probeY = _rc.bottom + 50;
+			_probeI = (float)_rc.bottom;
+			_probeY = (float)_rc.bottom + 50.0f;
 
 			_gravity = 9.0f;
 		}
@@ -91,8 +97,8 @@ void player::move()
 		if (_state == LANDING && !pixelCollision(_probeY, 0, 255, 0))
 		{
 			_state = DOWN;
-			_probeI = _rc.bottom;
-			_probeY = _rc.bottom + 50;
+			_probeI = (float)_rc.bottom;
+			_probeY = (float)_rc.bottom + 50.0f;
 
 			_gravity = 9.0f;
 		}
@@ -104,7 +110,7 @@ void player::move()
 		// 초록 땅을 밟은 상태에서 하단 점프를 하는 경우
 		if (pixelCollision(_probeY, 0, 255, 0))
 		{
-			_jumpPower = 0;
+			_jumpPower = 0.0f;
 			_gravity = 9.0f;
 
 			_state = DOWNJUMP;			// 하단 점프상태(DOWNJUMP)로 변경
@@ -125,7 +131,6 @@ void player::move()
 	}
 
 	
-
 	_y -= _jumpPower;			// 남은 점프파워 만큼 캐릭터 점프(상하 이동)
 	_jumpPower -= _gravity;		// 점프파워가 중력에 의해 영향을 받음
 	if (_jumpPower < 0 && !pixelCollision(_probeY, 0,255, 0)) _state = DOWN;	// 점프파워가 0보다 작아서 캐릭터가 하강인 경우에 -> 상태를 다운으로 변경
@@ -134,30 +139,25 @@ void player::move()
 	// 캐릭터 상태에 따른 픽셀충돌(_probeY) 조정
 	if (_state == UP)
 	{
-		_probeI = _rc.top;
-		_probeY = _rc.bottom;
+		_probeI = (float)_rc.top;
+		_probeY = (float)_rc.bottom;
 	}
 	if (_state == LANDING)
 	{
-		_probeI = _rc.bottom - 100;
-		_probeY = _rc.bottom + 50;
+		_probeI = (float)_rc.bottom - 100;
+		_probeY = (float)_rc.bottom + 50;
 
 		if (pixelCollision(_probeY, 0, 255, 0))
 		{
-			//_jumpCount = 0;			// 녹색 바닥을 밟으면 점프카운트를 0으로 -> 착지상태로
-			//_jumpPower = 0.0f;		// 점프파워 설정	
-			//_gravity = 0.0f;
-
 			_y = _probeI - 25.0f;		// y좌표를 땅 위로 설정
-
 		}
 	}
 
 	// 하강 상태
 	if (_state == DOWN)
 	{
-		_probeI = _rc.bottom;
-		_probeY = _rc.bottom + 80;
+		_probeI = (float)_rc.bottom;
+		_probeY = (float)_rc.bottom + 70.0f;
 
 		if (pixelCollision(_probeY, 0, 255, 0))	// 녹색 바닥과 충돌 했는가?
 		{
@@ -176,7 +176,7 @@ void player::move()
 			_jumpPower = 0.0f;		// 점프파워 설정	
 			_gravity = 0.0f;		// 아래로 내려가지 않게 중력을 0으로 설정
 		
-			_y = _probeI - 25;		// y좌표를 땅 위로 설정
+			_y = _probeI - 25.0f;		// y좌표를 땅 위로 설정
 			_state = LANDING;		// 착지 상태로 변경
 		}
 	}
@@ -184,8 +184,8 @@ void player::move()
 	// 하단 점프를 하고 있을 때
 	if (_state == DOWNJUMP)
 	{
-		_probeI = _rc.top;
-		_probeY = _rc.bottom;
+		_probeI = (float)_rc.top;
+		_probeY = (float)_rc.bottom;
 
 		// 녹색 땅과 충돌에서 벗어난 경우
 		if (!pixelCollision(_probeY, 0, 255, 0))
@@ -198,9 +198,9 @@ void player::move()
 
 	// 캐릭터의 상하좌우 맵 이탈 방지
 	if (_x - 25 <= 0.0f) _x = 25.0f;
-	if (_x + 25 >= _map->getWidth()) _x = _map->getWidth() - 25;
+	if (_x + 25 >= _map->getWidth()) _x = _map->getWidth() - 25.0f;
 	if (_y - 25 <= 0.0f) _y = 25.0f;
-	if (_y + 25 >= _map->getHeight()) _y = _map->getHeight() - 25;
+	if (_y + 25 >= _map->getHeight()) _y = _map->getHeight() - 25.0f;
 
 	_rc = RectMakeCenter(_x, _y, 50, 50);		// 최종 좌표에 캐릭터의 포지션을 잡는다
 
@@ -210,18 +210,21 @@ void player::move()
 
 void player::dash()
 {	
-	if (_dashPower > 0.0f)
-	{
-		_x = cosf(_angle) * _dashPower;
-		_y = -sinf(_angle) * _dashPower;
+	//if (!_dash) return;	// 대쉬 상태가 아니면 대쉬하지 않고 리턴
 
-		_dashPower -= 3.0f;
+	_x += cosf(_angle) * _dashPower;
+	_y += -sinf(_angle) * _dashPower;
+	
+	_rc = RectMakeCenter(_x, _y, 50, 50);		// 최종 좌표에 캐릭터의 포지션을 잡는다
+
+	_dashCount += 70.0f;
+
+	if (_dashCount > 100.0f)
+	{
+		_dashCount = 0.0f;
+		_dash = false;
 	}
 	
-	_dashPower = 10.0f;
-
-	
-
 }
 
 bool player::pixelCollision(int probeY, int probeR, int probeG, int probeB)
