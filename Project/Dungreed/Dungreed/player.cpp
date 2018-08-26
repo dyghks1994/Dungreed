@@ -54,6 +54,9 @@ void player::update()
 	
 	if(_dash)
 		dash();		// 대쉬 기능 호출
+
+	//_y -= _jumpPower;			// 남은 점프파워 만큼 캐릭터 점프(상하 이동)
+	//_jumpPower -= _gravity;		// 점프파워가 중력에 의해 영향을 받음
 	
 	cameraMove();
 }
@@ -214,10 +217,34 @@ void player::dash()
 
 	_x += cosf(_angle) * _dashPower;
 	_y += -sinf(_angle) * _dashPower;
-	
-	_rc = RectMakeCenter(_x, _y, 50, 50);		// 최종 좌표에 캐릭터의 포지션을 잡는다
 
-	_dashCount += 70.0f;
+	_dashCount += 110.0f;
+	_gravity = 7.5f;
+
+	if (_angle <= PI)
+	{
+		_state = UP;
+		_probeI = (float)_rc.top;
+		_probeY = (float)_rc.bottom;
+	}
+	if (_angle > PI)
+	{
+		_state = DOWNJUMP;
+		_probeI = (float)_rc.top;
+		_probeY = (float)_rc.bottom;
+
+		if (pixelCollision(_probeY, 255, 0, 0)) // 빨강 바닥과 충돌 했는가?
+		{
+			_jumpCount = 0;			// 빨강 바닥을 밟으면 점프카운트를 0으로 -> 착지상태로
+			_jumpPower = 0.0f;		// 점프파워 설정	
+			_gravity = 0.0f;		// 아래로 내려가지 않게 중력을 0으로 설정
+
+			_y = _probeI - 25.0f;		// y좌표를 땅 위로 설정
+			_state = LANDING;		// 착지 상태로 변경
+		}
+	}
+
+	_rc = RectMakeCenter(_x, _y, 50, 50);		// 최종 좌표에 캐릭터의 포지션을 잡는다
 
 	if (_dashCount > 100.0f)
 	{
