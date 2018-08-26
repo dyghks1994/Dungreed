@@ -25,6 +25,8 @@ HRESULT player::init()
 	_jumpCount = 0.0f;			// 점프카운트 초기화
 	_gravity = 0.6f;			// 중력 설정
 
+	_anglePoint.x = WINSIZEX / 2;
+	_anglePoint.y = WINSIZEY / 2;
 	_angle = getAngle(_x, _y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
 
 	_dash = false;				// 처음엔 대쉬 상태가 아니게 시작
@@ -145,9 +147,11 @@ void player::move()
 		_probeI = (float)_rc.top;
 		_probeY = (float)_rc.bottom;
 	}
+
+	// 바닥에 착지 상태
 	if (_state == LANDING)
 	{
-		_probeI = (float)_rc.bottom - 100;
+		_probeI = (float)_rc.bottom - 80;
 		_probeY = (float)_rc.bottom + 50;
 
 		if (pixelCollision(_probeY, 0, 255, 0))
@@ -279,6 +283,15 @@ bool player::pixelCollision(int probeY, int probeR, int probeG, int probeB)
 		}
 	}
 	return false;	// 픽셀 탐색 결과 원하는 색상과 다름
+}
+
+void player::anglePointMove()
+{
+	if (KEYMANAGER->isStayKeyDown('A'))
+	{
+
+	}
+
 }
 
 void player::cameraMove()
