@@ -20,6 +20,12 @@ HRESULT player::init()
 	_y = 250.0f;		// 시작위치 Y
 	_rc = RectMakeCenter(_x, _y, 50, 50);
 
+	_player = IMAGEMANAGER->addFrameImage("플레이어", "image/gameScene/플레이어.bmp", 160, 100, 5, 2, true, RGB(255, 0, 255));
+	_player->setX(700.0f);
+	_player->setY(250.0f);
+	_player->setFrameX(0);
+	_player->setFrameY(0);
+
 	_moveSpeed = 40.0f;			// 이동속도 설정
 	_jumpPower = 0.0f;			// 점프파워 초기화
 	_jumpCount = 0.0f;			// 점프카운트 초기화
@@ -27,7 +33,8 @@ HRESULT player::init()
 
 	_anglePoint.x = WINSIZEX / 2;
 	_anglePoint.y = WINSIZEY / 2;
-	_angle = getAngle(_x, _y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
+	_angleRc = RectMakeCenter(_anglePoint.x, _anglePoint.y, 25, 25);
+	_angle = getAngle(_anglePoint.x, _anglePoint.y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
 
 	_dash = false;				// 처음엔 대쉬 상태가 아니게 시작
 	_dashPower = 200.0f;		// 대쉬 파워 초기화
@@ -48,7 +55,7 @@ void player::update()
 	if (_rightButtonDown && !_dash)
 	{
 		_dash = true;	// 마우스 오른쪽 클릭되면 대쉬 상태로
-		_angle = getAngle(_x, _y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
+		_angle = getAngle(_anglePoint.x, _anglePoint.y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
 	}
 
 	if(!_dash)
@@ -61,15 +68,23 @@ void player::update()
 	//_jumpPower -= _gravity;		// 점프파워가 중력에 의해 영향을 받음
 	
 	cameraMove();
+
+	anglePointMove();
 }
 
 void player::render()
 {
 	// 샘플 캐릭터 렌더
 	Rectangle(this->getMemDC(), _rc.left, _rc.top, _rc.right, _rc.bottom);
+
+	// 캐릭터 이미지 렌더
+	_player->frameRender(getMemDC(), _x, _y, 0, 0);
 	
 	// 카메라를 이용한 보여주기 렌더
 	_backBuffer->render(getMemDC(), 0, 0, _cameraX, _cameraY, WINSIZEX, WINSIZEY);
+
+	// 각도 측정용 RECT 확인용 렌더
+	Rectangle(getMemDC(), _angleRc.left, _angleRc.top, _angleRc.right, _angleRc.bottom);
 
 	// 좌표 확인
 	char str[100];
@@ -84,7 +99,9 @@ void player::move()
 	// 좌로 이동
 	if (KEYMANAGER->isStayKeyDown('A'))
 	{
-		_x -= _moveSpeed;	// 플레이어 x좌표 감소
+		_x -= _moveSpeed;				// 플레이어 x좌표 감소
+		if (_x - 25 < 0.0f) _x = 25.0f;	// 왼쪽으로 맵 이탈 방지
+
 		if (_state == LANDING && !pixelCollision(_probeY, 0, 255, 0))
 		{
 			_state = DOWN;
@@ -99,6 +116,8 @@ void player::move()
 	if (KEYMANAGER->isStayKeyDown('D'))
 	{
 		_x += _moveSpeed;	// 플레이어 x좌표 증가
+		if (_x + 25 > _map->getWidth()) _x = _map->getWidth() - 25.0f; // 오른쪽으로 맵 이탈 방지
+
 		if (_state == LANDING && !pixelCollision(_probeY, 0, 255, 0))
 		{
 			_state = DOWN;
@@ -140,12 +159,24 @@ void player::move()
 	_jumpPower -= _gravity;		// 점프파워가 중력에 의해 영향을 받음
 	if (_jumpPower < 0 && !pixelCollision(_probeY, 0,255, 0)) _state = DOWN;	// 점프파워가 0보다 작아서 캐릭터가 하강인 경우에 -> 상태를 다운으로 변경
 
-
 	// 캐릭터 상태에 따른 픽셀충돌(_probeY) 조정
+	// 위로 점프하는 상태
 	if (_state == UP)
 	{
 		_probeI = (float)_rc.top;
 		_probeY = (float)_rc.bottom;
+
+		if (_y - _cameraY != WINSIZEY / 2)
+		{
+			_anglePoint.y -= _jumpPower;
+
+			if (_anglePoint.y < 0)
+			{
+				_anglePoint.y = 25;
+			}
+
+			_angleRc = RectMakeCenter(_anglePoint.x, _anglePoint.y, 25, 25);
+		}
 	}
 
 	// 바닥에 착지 상태
@@ -186,6 +217,18 @@ void player::move()
 			_y = _probeI - 25.0f;		// y좌표를 땅 위로 설정
 			_state = LANDING;		// 착지 상태로 변경
 		}
+
+		if (_y - _cameraY != WINSIZEY / 2)
+		{
+			_anglePoint.y -= _jumpPower;
+
+			if (_anglePoint.y < 0)
+			{
+				_anglePoint.y = 25;
+			}
+
+			_angleRc = RectMakeCenter(_anglePoint.x, _anglePoint.y, 25, 25);
+		}
 	}
 
 	// 하단 점프를 하고 있을 때
@@ -204,10 +247,10 @@ void player::move()
 
 
 	// 캐릭터의 상하좌우 맵 이탈 방지
-	if (_x - 25 <= 0.0f) _x = 25.0f;
-	if (_x + 25 >= _map->getWidth()) _x = _map->getWidth() - 25.0f;
-	if (_y - 25 <= 0.0f) _y = 25.0f;
-	if (_y + 25 >= _map->getHeight()) _y = _map->getHeight() - 25.0f;
+	//if (_x - 25 < 0.0f) _x = 25.0f;
+	if (_x + 25 > _map->getWidth()) _x = _map->getWidth() - 25.0f;
+	if (_y - 25 < 0.0f) _y = 25.0f;
+	if (_y + 25 > _map->getHeight()) _y = _map->getHeight() - 25.0f;
 
 	_rc = RectMakeCenter(_x, _y, 50, 50);		// 최종 좌표에 캐릭터의 포지션을 잡는다
 
@@ -279,7 +322,7 @@ bool player::pixelCollision(int probeY, int probeR, int probeG, int probeB)
 
 		if (r == probeR && g == probeG && b == probeB)
 		{
-			return true;		// 픽실 탐색 결과 원하는 색상과 일치함.			
+			return true;		// 픽셀 탐색 결과 원하는 색상과 일치함.			
 		}
 	}
 	return false;	// 픽셀 탐색 결과 원하는 색상과 다름
@@ -289,8 +332,36 @@ void player::anglePointMove()
 {
 	if (KEYMANAGER->isStayKeyDown('A'))
 	{
+		if (_x - _cameraX != WINSIZEX / 2)
+		{
+			_anglePoint.x -= _moveSpeed;
+		}
 
+		if (_anglePoint.x < 0)
+		{
+			_anglePoint.x = 25;
+		}
 	}
+
+	if (KEYMANAGER->isStayKeyDown('D'))
+	{
+		if (_x - _cameraX != WINSIZEX / 2)
+		{
+			_anglePoint.x += _moveSpeed;
+		}
+
+		if (_anglePoint.x > WINSIZEX - 25)
+		{
+			_anglePoint.x = WINSIZEX - 25;
+		}
+	}
+
+	//if (KEYMANAGER->isOnceKeyDown(VK_SPACE) || KEYMANAGER->isStayKeyDown('W'))
+	//{
+	//	_anglePoint.y -= _jumpPower;
+	//}
+
+	_angleRc = RectMakeCenter(_anglePoint.x, _anglePoint.y, 25, 25);
 
 }
 
@@ -303,13 +374,13 @@ void player::cameraMove()
 	// ********* 카메라가 맵을 벗어나지 않도록 위치 조정 **********************
 
 	// 캐릭터가 왼쪽 끝에 가까워져 카메라가 왼쪽으로 이동하면 안될 때
-	if (_x - WINSIZEX / 2 <= 0) _cameraX = 0;
+	if (_x - WINSIZEX / 2 < 0) _cameraX = 0;
 	// 캐릭터가 위쪽 끝에 가까워져 카메라가 위쪽으로 이동하면 안될 때
-	if (_y - WINSIZEY / 2 <= 0) _cameraY = 0;
+	if (_y - WINSIZEY / 2 < 0) _cameraY = 0;
 	// 캐릭터가 오른쪽 끝에 가까워져 카메라가 오른쪽으로 이동하면 안될 때
-	if (_x + WINSIZEX / 2 >= _map->getWidth()) _cameraX = _map->getWidth() - WINSIZEX;
+	if (_x + WINSIZEX / 2 > _map->getWidth()) _cameraX = _map->getWidth() - WINSIZEX;
 	//// 캐릭터가 아래쪽 끝에 가까워져 카메라가 아래쪽으로 이동하면 안될 때
-	if (_y + WINSIZEY / 2 >= _map->getWidth()) _cameraY = _map->getHeight() - WINSIZEY;
+	if (_y + WINSIZEY / 2 > _map->getWidth()) _cameraY = _map->getHeight() - WINSIZEY;
 
 	// end of 카메라 조정 **********************************************************************************
 }
