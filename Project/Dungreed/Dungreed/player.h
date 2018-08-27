@@ -25,6 +25,7 @@ private:
 									// 그래서 윈도우창 안에서만 움직이는(실제 플레이어는 윈도우창을 벗어나서 움직임), 대쉬와 원거리공격에 사용할 각도를 위한 
 									// POINT(점)를 하나 만듬
 	RECT _angleRc;					// 각도 RECT를 확인하기 위한 테스트용 렉트
+	float _angleRcJumpPower;			// 각도 측정용 RECT의 점프파워
 	
 	bool  _dash;					// 대쉬 상태인지 판별하는 변수
 	float _dashPower;				// 대쉬 파워

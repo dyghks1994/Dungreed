@@ -17,7 +17,7 @@ HRESULT player::init()
 	_probeY = (float)(_rc.bottom + 10.0f);	// 다운 상태에서 탐사Y 설정
 
 	_x = 700.0f;		// 시작위치 X
-	_y = 250.0f;		// 시작위치 Y
+	_y = 700.0f;		// 시작위치 Y
 	_rc = RectMakeCenter(_x, _y, 50, 50);
 
 	_player = IMAGEMANAGER->addFrameImage("플레이어", "image/gameScene/플레이어.bmp", 160, 100, 5, 2, true, RGB(255, 0, 255));
@@ -31,10 +31,11 @@ HRESULT player::init()
 	_jumpCount = 0.0f;			// 점프카운트 초기화
 	_gravity = 0.6f;			// 중력 설정
 
-	_anglePoint.x = WINSIZEX / 2;
-	_anglePoint.y = WINSIZEY / 2;
+	_anglePoint.x = WINSIZEX / 2;	// 각도 측정용 RECT 좌표 x
+	_anglePoint.y = WINSIZEY / 2;	// 각도 측정용 RECT 좌표 y
 	_angleRc = RectMakeCenter(_anglePoint.x, _anglePoint.y, 25, 25);
 	_angle = getAngle(_anglePoint.x, _anglePoint.y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
+	_angleRcJumpPower = _jumpPower;
 
 	_dash = false;				// 처음엔 대쉬 상태가 아니게 시작
 	_dashPower = 200.0f;		// 대쉬 파워 초기화
@@ -134,7 +135,7 @@ void player::move()
 		// 초록 땅을 밟은 상태에서 하단 점프를 하는 경우
 		if (pixelCollision(_probeY, 0, 255, 0))
 		{
-			_jumpPower = 0.0f;
+			_jumpPower = -10.0f;
 			_gravity = 9.0f;
 
 			_state = DOWNJUMP;			// 하단 점프상태(DOWNJUMP)로 변경
@@ -156,7 +157,8 @@ void player::move()
 
 	
 	_y -= _jumpPower;			// 남은 점프파워 만큼 캐릭터 점프(상하 이동)
-	_jumpPower -= _gravity;		// 점프파워가 중력에 의해 영향을 받음
+	_angleRcJumpPower = _jumpPower;
+	_jumpPower -= _gravity;		// 점프파워가 중력에 의해 영향을 받음(감소함)
 	if (_jumpPower < 0 && !pixelCollision(_probeY, 0,255, 0)) _state = DOWN;	// 점프파워가 0보다 작아서 캐릭터가 하강인 경우에 -> 상태를 다운으로 변경
 
 	// 캐릭터 상태에 따른 픽셀충돌(_probeY) 조정
@@ -166,9 +168,11 @@ void player::move()
 		_probeI = (float)_rc.top;
 		_probeY = (float)_rc.bottom;
 
+		if (_y - 25 < 0.0f) _y = 25.0f; // 플레이어 맵 위로 이탈 방지
+
 		if (_y - _cameraY != WINSIZEY / 2)
 		{
-			_anglePoint.y -= _jumpPower;
+			_anglePoint.y -= _angleRcJumpPower;
 
 			if (_anglePoint.y < 0)
 			{
@@ -197,6 +201,8 @@ void player::move()
 		_probeI = (float)_rc.bottom;
 		_probeY = (float)_rc.bottom + 70.0f;
 
+		if (_y + 25 > _map->getHeight()) _y = _map->getHeight() - 25.0f;
+
 		if (pixelCollision(_probeY, 0, 255, 0))	// 녹색 바닥과 충돌 했는가?
 		{
 			_jumpCount = 0;			// 녹색 바닥을 밟으면 점프카운트를 0으로 -> 착지상태로
@@ -220,11 +226,11 @@ void player::move()
 
 		if (_y - _cameraY != WINSIZEY / 2)
 		{
-			_anglePoint.y -= _jumpPower;
+			_anglePoint.y -= _angleRcJumpPower;
 
-			if (_anglePoint.y < 0)
+			if (_anglePoint.y > WINSIZEY / 2)
 			{
-				_anglePoint.y = 25;
+				_anglePoint.y = WINSIZEY / 2;
 			}
 
 			_angleRc = RectMakeCenter(_anglePoint.x, _anglePoint.y, 25, 25);
@@ -245,13 +251,6 @@ void player::move()
 		}
 	}
 
-
-	// 캐릭터의 상하좌우 맵 이탈 방지
-	//if (_x - 25 < 0.0f) _x = 25.0f;
-	if (_x + 25 > _map->getWidth()) _x = _map->getWidth() - 25.0f;
-	if (_y - 25 < 0.0f) _y = 25.0f;
-	if (_y + 25 > _map->getHeight()) _y = _map->getHeight() - 25.0f;
-
 	_rc = RectMakeCenter(_x, _y, 50, 50);		// 최종 좌표에 캐릭터의 포지션을 잡는다
 
 	// end of 캐릭터 조정 *********************************************************************************
@@ -260,8 +259,6 @@ void player::move()
 
 void player::dash()
 {	
-	//if (!_dash) return;	// 대쉬 상태가 아니면 대쉬하지 않고 리턴
-
 	_x += cosf(_angle) * _dashPower;
 	_y += -sinf(_angle) * _dashPower;
 
@@ -286,7 +283,7 @@ void player::dash()
 			_jumpPower = 0.0f;		// 점프파워 설정	
 			_gravity = 0.0f;		// 아래로 내려가지 않게 중력을 0으로 설정
 
-			_y = _probeI - 25.0f;		// y좌표를 땅 위로 설정
+			_y = _probeI - 25.0f;	// y좌표를 땅 위로 설정
 			_state = LANDING;		// 착지 상태로 변경
 		}
 	}
