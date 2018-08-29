@@ -65,9 +65,6 @@ void player::update()
 	if(_dash)
 		dash();		// 대쉬 기능 호출
 
-	//_y -= _jumpPower;			// 남은 점프파워 만큼 캐릭터 점프(상하 이동)
-	//_jumpPower -= _gravity;		// 점프파워가 중력에 의해 영향을 받음
-	
 	cameraMove();
 
 	anglePointMove();
@@ -329,11 +326,14 @@ void player::anglePointMove()
 {
 	if (KEYMANAGER->isStayKeyDown('A'))
 	{
-		if (_x - _cameraX != WINSIZEX / 2)
+		//if (_x - _cameraX != WINSIZEX / 2)
+		//{
+		//	_anglePoint.x -= _moveSpeed;
+		//}
+		if (_x >= _map->getWidth() - (WINSIZEX / 2 + _moveSpeed))
 		{
 			_anglePoint.x -= _moveSpeed;
 		}
-
 		if (_anglePoint.x < 0)
 		{
 			_anglePoint.x = 25;
@@ -342,7 +342,11 @@ void player::anglePointMove()
 
 	if (KEYMANAGER->isStayKeyDown('D'))
 	{
-		if (_x - _cameraX != WINSIZEX / 2)
+		//if (_x - _cameraX != WINSIZEX / 2)
+		//{
+		//	_anglePoint.x += _moveSpeed;
+		//}
+		if (_x <= WINSIZEX / 2 + _moveSpeed)
 		{
 			_anglePoint.x += _moveSpeed;
 		}
