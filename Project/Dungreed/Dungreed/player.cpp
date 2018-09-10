@@ -36,6 +36,8 @@ HRESULT player::init()
 	_angleRc = RectMakeCenter(_anglePoint.x, _anglePoint.y, 25, 25);
 	_angle = getAngle(_anglePoint.x, _anglePoint.y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
 	_angleRcJumpPower = _jumpPower;
+	_angleFlagDirectionRight = false;
+	_angleFlagDirectionLeft = true;
 
 	_dash = false;				// 처음엔 대쉬 상태가 아니게 시작
 	_dashPower = 200.0f;		// 대쉬 파워 초기화
@@ -59,15 +61,19 @@ void player::update()
 		_angle = getAngle(_anglePoint.x, _anglePoint.y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
 	}
 
-	if(!_dash)
+	if (!_dash)
+	{
 		move();		// 캐릭터의 기본 상하좌우 이동과 점프 기능
-	
-	if(_dash)
+		cameraMove();
+		anglePointMove();
+	}
+		
+	if (_dash)
+	{
 		dash();		// 대쉬 기능 호출
-
-	cameraMove();
-
-	anglePointMove();
+		cameraMove();
+	}
+	
 }
 
 void player::render()
@@ -98,7 +104,7 @@ void player::move()
 	if (KEYMANAGER->isStayKeyDown('A'))
 	{
 		_x -= _moveSpeed;				// 플레이어 x좌표 감소
-		if (_x - 25 < 0.0f) _x = 25.0f;	// 왼쪽으로 맵 이탈 방지
+		if (_x - 25.0f < 0.0f) _x = 25.0f;	// 왼쪽으로 맵 이탈 방지
 
 		if (_state == LANDING && !pixelCollision(_probeY, 0, 255, 0))
 		{
@@ -114,7 +120,7 @@ void player::move()
 	if (KEYMANAGER->isStayKeyDown('D'))
 	{
 		_x += _moveSpeed;	// 플레이어 x좌표 증가
-		if (_x + 25 > _map->getWidth()) _x = _map->getWidth() - 25.0f; // 오른쪽으로 맵 이탈 방지
+		if (_x + 25.0f > _map->getWidth()) _x = _map->getWidth() - 25.0f; // 오른쪽으로 맵 이탈 방지
 
 		if (_state == LANDING && !pixelCollision(_probeY, 0, 255, 0))
 		{
@@ -154,7 +160,7 @@ void player::move()
 
 	
 	_y -= _jumpPower;			// 남은 점프파워 만큼 캐릭터 점프(상하 이동)
-	_angleRcJumpPower = _jumpPower;
+	_angleRcJumpPower = _jumpPower;	// 각도 측정용 렉트도 점프파워만큼 점프
 	_jumpPower -= _gravity;		// 점프파워가 중력에 의해 영향을 받음(감소함)
 	if (_jumpPower < 0 && !pixelCollision(_probeY, 0,255, 0)) _state = DOWN;	// 점프파워가 0보다 작아서 캐릭터가 하강인 경우에 -> 상태를 다운으로 변경
 
@@ -167,7 +173,7 @@ void player::move()
 
 		if (_y - 25 < 0.0f) _y = 25.0f; // 플레이어 맵 위로 이탈 방지
 
-		if (_y - _cameraY != WINSIZEY / 2)
+		if (_y <= WINSIZEY / 2)
 		{
 			_anglePoint.y -= _angleRcJumpPower;
 
@@ -259,8 +265,16 @@ void player::dash()
 	_x += cosf(_angle) * _dashPower;
 	_y += -sinf(_angle) * _dashPower;
 
+	// 각도 조절용 _angleRc 조절해야 하는가?
+	if (_x <= WINSIZEX / 2 || _x >= _map->getWidth() - WINSIZEX / 2 ||
+		_y <= WINSIZEY / 2)
+	{
+		_anglePoint.x += cosf(_angle) * _dashPower;
+		_anglePoint.y += -sinf(_angle) * _dashPower;		
+	}
+
 	_dashCount += 110.0f;
-	_gravity = 7.5f;
+	_gravity = 6.0f;
 
 	if (_angle <= PI)
 	{
@@ -285,8 +299,13 @@ void player::dash()
 		}
 	}
 
+	if (_x - 25 < 0.0f) _x = 25.0f;	// 왼쪽으로 맵 이탈 방지
+	if (_x + 25 > _map->getWidth()) _x = _map->getWidth() - 25.0f; // 오른쪽으로 맵 이탈 방지
+
 	_rc = RectMakeCenter(_x, _y, 50, 50);		// 최종 좌표에 캐릭터의 포지션을 잡는다
 
+	anglePointMove();
+	
 	if (_dashCount > 100.0f)
 	{
 		_dashCount = 0.0f;
@@ -326,14 +345,21 @@ void player::anglePointMove()
 {
 	if (KEYMANAGER->isStayKeyDown('A'))
 	{
-		//if (_x - _cameraX != WINSIZEX / 2)
-		//{
-		//	_anglePoint.x -= _moveSpeed;
-		//}
-		if (_x >= _map->getWidth() - (WINSIZEX / 2 + _moveSpeed))
+		if (_x < WINSIZEX / 2)
+		{
+			_angleFlagDirectionRight = false;
+		}
+		if (_x - _cameraX != WINSIZEX / 2)
 		{
 			_anglePoint.x -= _moveSpeed;
 		}
+
+		if (_x - _cameraX == WINSIZEX / 2 && _angleFlagDirectionLeft == false)
+		{
+			_anglePoint.x -= _moveSpeed;
+			_angleFlagDirectionLeft = true;
+		}
+		
 		if (_anglePoint.x < 0)
 		{
 			_anglePoint.x = 25;
@@ -342,13 +368,20 @@ void player::anglePointMove()
 
 	if (KEYMANAGER->isStayKeyDown('D'))
 	{
-		//if (_x - _cameraX != WINSIZEX / 2)
-		//{
-		//	_anglePoint.x += _moveSpeed;
-		//}
-		if (_x <= WINSIZEX / 2 + _moveSpeed)
+		if (_x > _map->getWidth() - WINSIZEX / 2)
+		{
+			_angleFlagDirectionLeft = false;
+		}
+
+		if (_x - _cameraX != WINSIZEX / 2)
 		{
 			_anglePoint.x += _moveSpeed;
+		}
+
+		if (_x - _cameraX == WINSIZEX / 2 && _angleFlagDirectionRight == false)
+		{
+			_anglePoint.x += _moveSpeed;
+			_angleFlagDirectionRight = true;
 		}
 
 		if (_anglePoint.x > WINSIZEX - 25)
@@ -356,12 +389,6 @@ void player::anglePointMove()
 			_anglePoint.x = WINSIZEX - 25;
 		}
 	}
-
-	//if (KEYMANAGER->isOnceKeyDown(VK_SPACE) || KEYMANAGER->isStayKeyDown('W'))
-	//{
-	//	_anglePoint.y -= _jumpPower;
-	//}
-
 	_angleRc = RectMakeCenter(_anglePoint.x, _anglePoint.y, 25, 25);
 
 }
