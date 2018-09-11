@@ -43,7 +43,7 @@ public:
 	player();
 	~player();
 
-	virtual HRESULT init();
+	virtual HRESULT init(float x, float y);
 	virtual void release();
 	virtual void update();
 	virtual void render();
@@ -54,5 +54,8 @@ public:
 
 	void anglePointMove();
 	void cameraMove();
+
+	void setX(float x) { _x = x; }
+	void setY(float y) { _y = y; }
 };
 

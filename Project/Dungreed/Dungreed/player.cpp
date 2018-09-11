@@ -11,13 +11,13 @@ player::~player()
 {
 }
 
-HRESULT player::init()
+HRESULT player::init(float x, float y)
 {
 	_state = DOWN;	// 시작상태 -> 다운
 	_probeY = (float)(_rc.bottom + 10.0f);	// 다운 상태에서 탐사Y 설정
 
-	_x = 700.0f;		// 시작위치 X
-	_y = 700.0f;		// 시작위치 Y
+	_x = x;		// 시작위치 X
+	_y = y;		// 시작위치 Y
 	_rc = RectMakeCenter(_x, _y, 50, 50);
 
 	_player = IMAGEMANAGER->addFrameImage("플레이어", "image/gameScene/플레이어.bmp", 160, 100, 5, 2, true, RGB(255, 0, 255));

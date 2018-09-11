@@ -88,8 +88,14 @@ LRESULT gameNode::MainProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lPara
 	switch (iMessage)
 	{
 	case WM_CREATE:
-		_map = static_cast<image*>(IMAGEMANAGER->addImage("마을_표면", "image/gameScene/마을_표면.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255)));
-		_mapLand = static_cast<image*>(IMAGEMANAGER->addImage("마을_지형", "image/gameScene/마을_지형.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255)));
+
+		// 게임에서 사용할 이미지 추가
+		IMAGEMANAGER->addImage("마을_표면", "image/gameScene/마을_표면.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255));
+		IMAGEMANAGER->addImage("마을_지형", "image/gameScene/마을_지형.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255));
+		IMAGEMANAGER->addImage("테스트", "image/gameScene/testMap.bmp", WINSIZEX, WINSIZEY, true, RGB(255, 0, 255));
+
+		_map = static_cast<image*>(IMAGEMANAGER->findImage("마을_표면"));
+		_mapLand = static_cast<image*>(IMAGEMANAGER->findImage("마을_지형"));
 		break;
 
 	case WM_PAINT:

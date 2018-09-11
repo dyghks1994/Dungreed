@@ -2,10 +2,11 @@
 #include "gameNode.h"
 #include "player.h"
 
+// 마을 씬
 class gameScene : public gameNode
 {
 private:
-	player*	_player;	// 플레이어		
+	player*	_player;	// 플레이어
 
 public:
 	gameScene();

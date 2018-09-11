@@ -73,6 +73,9 @@
     <Filter Include="mainGame\gameScene\bullets">
       <UniqueIdentifier>{1bfcec3e-b37b-4549-95a6-0112b5b83def}</UniqueIdentifier>
     </Filter>
+    <Filter Include="mainGame\gameScene\dungeon">
+      <UniqueIdentifier>{3927dd94-fdd6-40d7-96fe-529f8fa3696c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -174,6 +177,9 @@
     <ClInclude Include="player.h">
       <Filter>mainGame\gameScene\player</Filter>
     </ClInclude>
+    <ClInclude Include="dungeon.h">
+      <Filter>mainGame\gameScene\dungeon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -259,6 +265,9 @@
     </ClCompile>
     <ClCompile Include="player.cpp">
       <Filter>mainGame\gameScene\player</Filter>
+    </ClCompile>
+    <ClCompile Include="dungeon.cpp">
+      <Filter>mainGame\gameScene\dungeon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

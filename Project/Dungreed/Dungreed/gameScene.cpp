@@ -21,7 +21,7 @@ HRESULT gameScene::init()
 	//IMAGEMANAGER->addImage("마을_지형", "image/gameScene/마을_지형.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255));
 
 	_player = new player;
-	_player->init();
+	_player->init(700.0f, 700.0f);
 	
 	return S_OK;
 }
@@ -33,6 +33,11 @@ void gameScene::release()
 void gameScene::update()
 {
 	_player->update();
+	
+	if (KEYMANAGER->isOnceKeyDown('Z'))
+	{
+		
+	}
 }
 
 void gameScene::render()
