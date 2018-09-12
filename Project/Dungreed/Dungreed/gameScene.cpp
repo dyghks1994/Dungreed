@@ -13,12 +13,9 @@ gameScene::~gameScene()
 
 HRESULT gameScene::init()
 {
-	//IMAGEMANAGER->addImage("마을_표면", "image/gameScene/마을_표면.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255));
 	_map = IMAGEMANAGER->findImage("마을_표면");
 	_map->setX(0);
 	_map->setY(0);
-	
-	//IMAGEMANAGER->addImage("마을_지형", "image/gameScene/마을_지형.bmp", BACKDCSIZEX, BACKDCSIZEY, true, RGB(255, 0, 255));
 
 	_player = new player;
 	_player->init(700.0f, 700.0f);
@@ -34,9 +31,12 @@ void gameScene::update()
 {
 	_player->update();
 	
+	
+
+	// 임시로 씬변환의 확인을 위해 z 키를 눌렀을 때 다른 씬(던전)으로 이동되는지 확인
 	if (KEYMANAGER->isOnceKeyDown('Z'))
 	{
-		
+		SCENEMANAGER->changeScene("던전");
 	}
 }
 
@@ -49,4 +49,9 @@ void gameScene::render()
 	
 	_player->render();
 	
+}
+
+void gameScene::goDungeon()
+{
+	SCENEMANAGER->changeScene("던전");
 }

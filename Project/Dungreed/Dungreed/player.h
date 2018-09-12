@@ -48,6 +48,11 @@ public:
 	virtual void update();
 	virtual void render();
 
+	float getX() { return _x; }
+	float getY() { return _y; }
+	void setX(float x) { _x = x; }
+	void setY(float y) { _y = y; }
+
 	void move();		// 상하좌우 이동 및 점프
 	void dash();		// 마우스 우클릭시 대쉬 기능
 	bool pixelCollision(int probeY, int probeR, int probeG, int probeB);
@@ -55,7 +60,6 @@ public:
 	void anglePointMove();
 	void cameraMove();
 
-	void setX(float x) { _x = x; }
-	void setY(float y) { _y = y; }
+	
 };
 

@@ -19,6 +19,8 @@ HRESULT mainGame::init(void)
 	_gameScene = new gameScene;						// 게임 씬 동적할당
 	SCENEMANAGER->addScene("게임씬", _gameScene);	// 게임 씬, 씬 리스트에 등록
 
+	_dungeon = new dungeon;							// 던전 동적할당
+	SCENEMANAGER->addScene("던전", _dungeon);		// 던전 씬, 씬 리스트에 등록
 
 	SCENEMANAGER->changeScene("스타트씬");			// 처음 시작하면 스타트씬으로 시작
 
