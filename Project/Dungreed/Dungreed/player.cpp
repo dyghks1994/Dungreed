@@ -60,19 +60,20 @@ void player::update()
 		_dash = true;	// 마우스 오른쪽 클릭되면 대쉬 상태로
 		_angle = getAngle(_anglePoint.x, _anglePoint.y, _ptMouse.x, _ptMouse.y);		// 마우스 방향에 맞춰 각도 설정
 	}
+	
+	if (_dash)
+	{
+		dash();		// 대쉬 기능 호출
+		cameraMove();
+	}
 
-	if (!_dash)
+	else if (!_dash)
 	{
 		move();		// 캐릭터의 기본 상하좌우 이동과 점프 기능
 		cameraMove();
 		anglePointMove();
 	}
 		
-	if (_dash)
-	{
-		dash();		// 대쉬 기능 호출
-		cameraMove();
-	}
 	
 }
 
@@ -273,7 +274,7 @@ void player::dash()
 		_anglePoint.y += -sinf(_angle) * _dashPower;		
 	}
 
-	_dashCount += 110.0f;
+	_dashCount += 50.0f;
 	_gravity = 6.0f;
 
 	if (_angle <= PI)
